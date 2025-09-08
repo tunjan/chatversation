@@ -29,7 +29,11 @@ export const getAiResponse = async (
       }
     });
 
-    return response.text.trim();
+    const text = response.text?.trim();
+    if (!text) {
+        throw new Error("Gemini API returned an empty response.");
+    }
+    return text;
   } catch (error) {
     console.error("Gemini API call failed in getAiResponse:", error);
     return "I'm having trouble responding right now. Please try again later.";
@@ -61,7 +65,11 @@ export const getInstantFeedback = async (
             }
         });
         
-        return response.text.trim();
+        const text = response.text?.trim();
+        if (!text) {
+            throw new Error("Gemini API returned an empty response for feedback.");
+        }
+        return text;
 
     } catch (error) {
         console.error("Gemini API call failed in getInstantFeedback:", error);
@@ -134,7 +142,10 @@ Now, provide your structured feedback as a JSON object.`;
       },
     });
 
-    let jsonStr = response.text.trim();
+    const jsonStr = response.text?.trim();
+    if (!jsonStr) {
+        throw new Error("Failed to get feedback analysis: API returned an empty response.");
+    }
     const parsedFeedback = JSON.parse(jsonStr);
 
     return parsedFeedback as Feedback;
