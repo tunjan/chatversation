@@ -49,10 +49,6 @@ export const getInstantFeedback = async (
                 role: m.role === Role.USER ? 'user' : 'model',
                 parts: [{ text: m.content }],
             }));
-        
-        if (contents.filter(c => c.role === 'user').length === 0) {
-            return "Let's begin. Ask the first question from the protocol.";
-        }
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',

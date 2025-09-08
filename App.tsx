@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { ChatInterface } from './components/ChatInterface';
 import { Sidebar } from './components/Sidebar';
 import { FeedbackDialog } from './components/FeedbackDialog';
+import { FlowchartTracker } from './components/FlowchartTracker';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './components/ui/Sheet';
 import { getAiResponse, getFeedbackAnalysis, getInstantFeedback } from './services/geminiService';
 import { Difficulty, Message, Role, Feedback, HistoryEntry } from './types';
@@ -160,11 +161,14 @@ function App() {
     dispatch({ type: 'SET_LOADING', payload: true });
 
     try {
-      const feedbackContent = await getInstantFeedback(currentHistoryWithUserMsg, flowchart, currentStep);
+      const [feedbackContent, aiResponseContent] = await Promise.all([
+        getInstantFeedback(currentHistoryWithUserMsg, flowchart, currentStep),
+        getAiResponse(currentHistoryWithUserMsg, difficulty)
+      ]);
+
       const feedbackMessage: Message = { role: Role.COACH, content: feedbackContent };
       dispatch({ type: 'ADD_MESSAGE', payload: feedbackMessage });
 
-      const aiResponseContent = await getAiResponse([...currentHistoryWithUserMsg, feedbackMessage], difficulty);
       const aiMessage: Message = { role: Role.AI, content: aiResponseContent };
       dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
 
@@ -237,6 +241,8 @@ function App() {
             onRestart={handleRestart}
           />
         </main>
+
+        <FlowchartTracker flowchart={flowchart} currentStep={currentStep} />
       </div>
 
       {feedback && (
